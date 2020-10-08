@@ -1,0 +1,11 @@
+name: CI
+
+on: [push]
+jobs:
+  job:
+    name: cmake-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: run-cmake
+        uses: lukka/run-cmake@v0.10
