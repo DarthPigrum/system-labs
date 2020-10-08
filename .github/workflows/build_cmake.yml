@@ -6,6 +6,12 @@ jobs:
     name: cmake-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: run-cmake
-        uses: lukka/run-cmake@v0.10
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Generate Makefile
+        run: cmake .
+      - name: Build
+        run: make
+      - name: Test
+        run: make test
+        
