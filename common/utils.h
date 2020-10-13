@@ -52,6 +52,52 @@ class UintContainer {
     _value |= (value << start);
   }
 };
+class BytePair {
+  Utils::UintContainer<uint8_t> _byte;
+ public:
+  explicit BytePair(uint8_t first = 0, uint8_t second = 0) {
+    _byte.set<0,3>(first);
+    _byte.set<4,7>(second);
+  }
+  template<uint8_t i>
+  uint8_t get() {
+    return _byte.get<0 + 4 * i, 3 + 4 * i>();
+  }
+  template<uint8_t i>
+  void set(uint8_t value) {
+    _byte.set<0 + 4 * i, 3 + 4 * i>(value);
+  }
+};
+template<size_t count>
+class Flags {
+  UintContainer<uint8_t> containers[count / 8 + (count % 8 ? 1 : 0)];
+ public:
+  bool get(size_t i) {
+    switch(i%8) {
+      case 0: return containers[i/8].template get<0>();
+      case 1: return containers[i/8].template get<1>();
+      case 2: return containers[i/8].template get<2>();
+      case 3: return containers[i/8].template get<3>();
+      case 4: return containers[i/8].template get<4>();
+      case 5: return containers[i/8].template get<5>();
+      case 6: return containers[i/8].template get<6>();
+      case 7: return containers[i/8].template get<7>();
+      default: return false;
+    }
+  }
+  void set(size_t i, bool value) {
+    switch(i%8) {
+      case 0: containers[i/8].template set<0>(value); break;
+      case 1: containers[i/8].template set<1>(value); break;
+      case 2: containers[i/8].template set<2>(value); break;
+      case 3: containers[i/8].template set<3>(value); break;
+      case 4: containers[i/8].template set<4>(value); break;
+      case 5: containers[i/8].template set<5>(value); break;
+      case 6: containers[i/8].template set<6>(value); break;
+      case 7: containers[i/8].template set<7>(value); break;
+    }
+  }
+};
 template<typename Constructable, template<typename> typename ...Mixins>
 class Composed : public Constructable, public Mixins<Composed<Constructable, Mixins...>> ... {
  public:
