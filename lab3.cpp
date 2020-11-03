@@ -1,58 +1,17 @@
 #include <QApplication>
 #include <QDebug>
+#include <QMap>
 #include <QTimer>
+#include <QVector>
 #include <deque>
 #include <random>
 
+#include "lab3/graphs.h"
 #include "lab3/gui.h"
-
-class Simulator {
-  int taskCounter = 0;
-  int quantSize;
-  int quantTimeLeft = 0;
-  std::deque<Task> queue;
-  std::random_device rd;
-  std::mt19937 gen;
-  std::uniform_int_distribution<> weight;
-  std::uniform_int_distribution<> priority;
-  std::uniform_int_distribution<> interval;
-  int intervalTimeLeft = 0;
-  int totalTicks = 0;
-  int productiveTicks = 0;
-
- public:
-  Simulator(int quantSize, std::pair<int, int> weightLimits,
-            std::pair<int, int> priorityLimits,
-            std::pair<int, int> intervalLimits)
-      : quantSize(quantSize),
-        quantTimeLeft(quantSize),
-        gen(rd()),
-        weight(weightLimits.first, weightLimits.second),
-        priority(priorityLimits.first, priorityLimits.second),
-        interval(intervalLimits.first, intervalLimits.second){};
-  const std::deque<Task>& tick() {
-    if (!intervalTimeLeft) {
-      intervalTimeLeft = interval(gen);
-      queue.push_back(Task(++taskCounter, weight(gen), priority(gen)));
-    }
-    if (queue.size()) {
-      if (++(queue.front())) productiveTicks++;
-      if (!quantTimeLeft) {
-        if (!queue.front().isFinished()) queue.push_back(queue.front());
-        queue.pop_front();
-        quantTimeLeft = quantSize;
-      };
-      --quantTimeLeft;
-    }
-    --intervalTimeLeft;
-    totalTicks++;
-    return queue;
-  }
-};
+#include "lab3/simulator.h"
 int main(int argc, char* argv[]) {
   QApplication a(argc, argv);
   View view;
-  view.show();
   Simulator* sim;
   QTimer* timer = new QTimer();
   QObject::connect(&view, &View::start, [&sim, &view, &timer]() {
@@ -60,13 +19,32 @@ int main(int argc, char* argv[]) {
                         view.getPriorityLimits(), view.getIntervalLimits());
     timer->setInterval(view.getSpeed());
     timer->start();
-    QObject::connect(timer, &QTimer::timeout,
-                     [&sim, &view]() { view.setTaskList(sim->tick()); });
+    QObject::connect(timer, &QTimer::timeout, [&sim, &view]() {
+      sim->tick();
+      view.setCurrentTask(sim->currentTask());
+      view.setTaskList(sim->queue());
+      view.setByPriorityGraph(generateByPriorityGraph(sim->finishedTasks()));
+    });
   });
   QObject::connect(&view, &View::stop, [&sim, &timer]() {
     timer->stop();
     delete sim;
   });
-
+  QObject::connect(&view, &View::draw, [&view]() {
+    const auto [minInterval, maxInterval] = view.getIntervalLimits();
+    std::map<int, std::vector<std::shared_ptr<Task>>> time;
+    std::map<int, double> idle;
+    for (int i = minInterval; i <= maxInterval; ++i) {
+      auto simulation =
+          new Simulator(view.getQuantSize(), view.getWeightLimits(),
+                        view.getPriorityLimits(), std::make_pair(i, i));
+      for (int n = 0; n < 2000; ++n) simulation->tick();
+      time[i] = simulation->finishedTasks();
+      idle[i] = simulation->loadFactor();
+    }
+    view.setTimeGraph(generateTimeGraph(time));
+    view.setIdleGraph(generateIdleGraph(idle));
+  });
+  view.show();
   return a.exec();
 }
