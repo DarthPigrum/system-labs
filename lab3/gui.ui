@@ -224,7 +224,7 @@
           <number>10000</number>
          </property>
          <property name="value">
-          <number>40</number>
+          <number>27</number>
          </property>
         </widget>
        </item>
@@ -258,7 +258,7 @@
        <item row="4" column="1">
         <widget class="QSpinBox" name="minTicks">
          <property name="value">
-          <number>1</number>
+          <number>17</number>
          </property>
         </widget>
        </item>

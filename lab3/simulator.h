@@ -37,7 +37,9 @@ class Simulator {
         gen(rd()),
         weight(weightLimits.first, weightLimits.second),
         priority(priorityLimits.first, priorityLimits.second),
-        interval(intervalLimits.first, intervalLimits.second){};
+        interval(intervalLimits.first, intervalLimits.second) {
+    _finishedTasks.reserve(10000);
+  };
   void tick() {
     if (!timeLeftInInterval) {
       timeLeftInInterval = interval(gen);

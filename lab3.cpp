@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
       auto simulation =
           new Simulator(view.getQuantSize(), view.getWeightLimits(),
                         view.getPriorityLimits(), std::make_pair(i, i));
-      for (int n = 0; n < 2000; ++n) simulation->tick();
+      for (int n = 0; n < 100000; ++n) simulation->tick();
       time[i] = simulation->finishedTasks();
       idle[i] = simulation->loadFactor();
     }
