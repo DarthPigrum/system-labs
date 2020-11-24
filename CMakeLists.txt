@@ -8,11 +8,15 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5Widgets)
 find_package(Qt5PrintSupport)
+find_package(Qt5Qml)
 
 add_executable(lab1.out lab1.cpp)
 add_executable(lab2.out lab2.cpp)
 add_executable(lab3.out lab3.cpp lab3/gui.h lab3/gui.ui 3rdparty/qcustomplot/qcustomplot.h 3rdparty/qcustomplot/qcustomplot.cpp)
 qt5_use_modules(lab3.out Widgets PrintSupport)
+add_executable(lab4.out lab4.cpp lab4/mainwindow.h lab4/mainwindow.ui 3rdparty/qcustomplot/qcustomplot.h 3rdparty/qcustomplot/qcustomplot.cpp)
+qt5_use_modules(lab4.out Widgets PrintSupport Qml)
+add_executable(lab4simulator.out lab4/simulator.cpp)
 
 enable_testing()
 add_test(NAME lab1 COMMAND lab1.out)
